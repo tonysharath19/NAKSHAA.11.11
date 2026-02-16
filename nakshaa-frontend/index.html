@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Nakshaa 11:11</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#000;color:#fff;overflow-x:hidden;font-weight:900;text-transform:capitalize}
+
+/* SECTION BASE */
+section{
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+text-align:center;
+position:relative;
+overflow:hidden;
+padding:84px 16px 44px;
+perspective:1400px;
+}
+
+/* DIVINE FONTS */
+h1{
+font-family:'Marcellus',serif;
+font-size:3.2rem;
+letter-spacing:2px;
+margin-bottom:20px;
+font-weight:900;
+}
+
+p{max-width:940px;opacity:1;margin-bottom:35px;font-weight:900}
+
+/* PREMIUM BUTTON */
+.btn{
+padding:14px 36px;
+border-radius:50px;
+border:1px solid #000;
+background:#fff;
+color:#000;
+font-weight:900;
+letter-spacing:1px;
+transition:transform .25s ease,color .25s ease;
+text-decoration:none;
+}
+.btn:hover{
+transform:translateY(-2px);
+color:#000;
+}
+.btn-ghost{
+background:#fff;
+color:#000;
+border:1px solid #000;
+}
+.btn-ghost:hover{
+color:#000;
+}
+.cta-row{
+display:flex;
+gap:12px;
+justify-content:center;
+flex-wrap:wrap;
+}
+.cta-row .btn{
+margin-top:0;
+}
+.intro-card{
+width:100%;
+}
+.intro-meta{
+display:inline-block;
+font-size:.78rem;
+letter-spacing:2px;
+margin-bottom:10px;
+opacity:.92;
+text-transform:capitalize;
+}
+
+/* GLASS PARALLAX CARD */
+.card{
+position:relative;
+background:linear-gradient(140deg,rgba(255,255,255,.2),rgba(255,255,255,.06));
+padding:60px 40px;
+border-radius:24px;
+border:1px solid rgba(0,0,0,.78);
+width:min(92vw,750px);
+max-width:750px;
+margin:0 auto;
+z-index:5;
+opacity:1;
+transform:translate3d(0,var(--card-shift,0px),0);
+transition:transform .35s ease;
+will-change:transform;
+overflow:hidden;
+}
+.card.active{
+opacity:1;
+}
+.card::before{
+content:"";
+position:absolute;
+inset:-140% -70%;
+background:linear-gradient(120deg,transparent 43%,rgba(255,255,255,.35) 50%,transparent 57%);
+transform:translateX(calc(-65% + var(--glass-slide,0%))) skewX(-8deg);
+pointer-events:none;
+}
+.card>*{
+position:relative;
+z-index:1;
+}
+
+/* BACKGROUND LAYERS */
+.bg{
+position:absolute;
+width:100%;
+height:100%;
+top:0;
+left:0;
+z-index:0;
+overflow:hidden;
+}
+.bg-video{
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+object-fit:cover;
+}
+.bg::after{
+content:"";
+position:absolute;
+inset:0;
+background:rgba(0,0,0,.45);
+pointer-events:none;
+}
+
+/* HEADER */
+header{
+position:fixed;
+top:0;
+width:100%;
+height:70px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:rgba(0,0,0,.35);
+z-index:1000;
+}
+.hamburger{
+position:absolute;
+left:20px;
+width:42px;
+height:34px;
+display:inline-flex;
+flex-direction:column;
+justify-content:center;
+gap:6px;
+background:transparent;
+border:none;
+padding:0;
+cursor:pointer;
+z-index:1002;
+}
+.hamburger .line{
+display:block;
+width:30px;
+height:3px;
+background:#fff;
+border-radius:999px;
+transition:transform .3s ease,opacity .25s ease;
+}
+.hamburger.active .line:nth-child(1){
+transform:translateY(9px) rotate(45deg);
+}
+.hamburger.active .line:nth-child(2){
+opacity:0;
+}
+.hamburger.active .line:nth-child(3){
+transform:translateY(-9px) rotate(-45deg);
+}
+.logo{
+font-family:'Marcellus',serif;
+font-size:24px;
+letter-spacing:3px;
+font-weight:900;
+color:#fff;
+text-decoration:none;
+}
+
+/* MENU */
+.menu{
+position:fixed;
+top:0;
+left:-100%;
+width:70%;
+height:100%;
+background:rgba(0,0,20,.92);
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+transition:.6s;
+z-index:1001;
+}
+.menu a{
+margin:20px 0;
+font-size:1.3rem;
+color:#fff;
+text-decoration:none;
+font-weight:900;
+}
+.menu.active{left:0}
+.menu-close{
+position:absolute;
+top:16px;
+right:16px;
+width:42px;
+height:42px;
+display:flex;
+align-items:center;
+justify-content:center;
+border:1px solid #000;
+border-radius:10px;
+background:transparent;
+color:#fff;
+font-size:30px;
+line-height:1;
+cursor:pointer;
+transition:transform .2s ease,background .2s ease,color .2s ease;
+}
+.menu-close:hover{
+transform:scale(1.05);
+background:#000;
+color:#fff;
+}
+
+/* SCROLL INDICATOR */
+.scroll{
+position:absolute;
+bottom:25px;
+font-size:12px;
+opacity:.65;
+letter-spacing:2px;
+font-weight:900;
+transition:opacity .35s ease,transform .35s ease;
+}
+.scroll.hidden{
+opacity:0;
+transform:translateY(6px);
+pointer-events:none;
+}
+
+/* CONTACT ICON BUTTONS */
+.contact-links{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:14px;
+flex-wrap:wrap;
+}
+.contact-btn{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:66px;
+height:66px;
+padding:0;
+border-radius:14px;
+border:1px solid #000;
+background:#fff;
+color:#000;
+text-decoration:none;
+transition:transform .25s ease,color .25s ease;
+}
+.contact-btn svg{
+width:30px;
+height:30px;
+display:block;
+flex:0 0 30px;
+fill:currentColor;
+}
+.contact-btn:hover{
+transform:translateY(-2px);
+color:#000;
+}
+
+/* FOOTER */
+footer{
+text-align:center;
+padding:20px;
+background:#000;
+font-size:13px;
+font-weight:900;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+h1{font-size:2rem}
+.card{padding:36px 18px;width:min(90vw,750px)}
+.menu{width:80%}
+.contact-links{flex-direction:row}
+.contact-btn{width:62px;height:62px}
+.cta-row{flex-direction:column}
+.cta-row .btn{width:100%}
+.intro-meta{font-size:.7rem;letter-spacing:1.4px}
+}
+
+@media(min-width:769px){
+section{padding:92px 56px 52px}
+.card{
+width:100%;
+max-width:none;
+padding:64px 72px;
+}
+p{max-width:none}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<button class="hamburger" id="hamburgerBtn" type="button" onclick="toggle()" aria-label="Toggle menu" aria-controls="menu" aria-expanded="false">
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"></span>
+</button>
+<a class="logo" href="#hero">Nakshaa 11:11</a>
+</header>
+
+<div class="menu" id="menu">
+<button class="menu-close" type="button" onclick="toggle(false)" aria-label="Close menu">&times;</button>
+<a href="#hero">Home</a>
+<a href="#today">Horoscope</a>
+<a href="#services">Services</a>
+<a href="#contact">Contact</a>
+</div>
+
+<!-- INTRO HERO -->
+<section id="hero">
+<div class="bg">
+<video class="bg-video" data-mobile-src="VIDEOS/herov.mp4" data-desktop-src="VIDEOS/herod.mp4" autoplay muted loop playsinline webkit-playsinline x5-playsinline preload="auto">
+<source src="VIDEOS/herov.mp4" type="video/mp4">
+</video>
+</div>
+<div class="card intro-card">
+<span class="intro-meta">WELCOME</span>
+<h1>Nakshaa Spiritual Guidance</h1>
+<p>Nakshaa was started in December 2025 with one clear mission: offer safe, practical spiritual guidance before any commitment. We consult first, analyse your unique life pattern, and then guide you with clear action steps across horoscope clarity, kundali depth, aura healing, and relationship support.</p>
+<div class="cta-row">
+<a href="#today" class="btn">Check Your Horoscope For Today</a>
+<a href="#services" class="btn btn-ghost">Services We Offer</a>
+<a href="#contact" class="btn btn-ghost">Contact Us</a>
+</div>
+</div>
+<div class="scroll">SCROLL &#8595;</div>
+</section>
+
+<!-- TODAY HOROSCOPE -->
+<section id="today">
+<div class="bg">
+<video class="bg-video" data-mobile-src="VIDEOS/land-v1.mp4" data-desktop-src="VIDEOS/land-d1.mp4" autoplay muted loop playsinline webkit-playsinline x5-playsinline preload="auto">
+<source src="VIDEOS/land-v1.mp4" type="video/mp4">
+</video>
+</div>
+<div class="card">
+<h1>Read Your Cosmic Destiny</h1>
+<p>The universe is alive around you. Step into divine alignment and discover your CELESTIAL TRUTH.</p>
+<a href="horoscope.html" class="btn">Check Your Horoscope</a>
+</div>
+<div class="scroll">SCROLL &#8595;</div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+<div class="bg">
+<video class="bg-video" data-mobile-src="VIDEOS/land-v2.mp4" data-desktop-src="VIDEOS/land-d2.mp4" autoplay muted loop playsinline webkit-playsinline x5-playsinline preload="auto">
+<source src="VIDEOS/land-v2.mp4" type="video/mp4">
+</video>
+</div>
+<div class="card">
+<h1>Our Services</h1>
+<p>Daily horoscopes. Monthly revelations. Kundali depth. Aura purification. Relationship harmony.</p>
+<a href="services.html" class="btn">Explore The Cosmos</a>
+</div>
+<div class="scroll">SCROLL &#8595;</div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+<div class="bg">
+<video class="bg-video" data-mobile-src="VIDEOS/land-v3.mp4" data-desktop-src="VIDEOS/land-d3.mp4" autoplay muted loop playsinline webkit-playsinline x5-playsinline preload="auto">
+<source src="VIDEOS/land-v3.mp4" type="video/mp4">
+</video>
+</div>
+<div class="card">
+<h1>Begin Your Transformation</h1>
+<p>The moment you reach out, the universe responds.</p>
+<div class="contact-links">
+<a href="https://www.instagram.com/" class="contact-btn instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z"/>
+</svg>
+</a>
+<a href="mailto:youremail@example.com" class="contact-btn gmail" aria-label="Email" title="Email">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+</svg>
+</a>
+</div>
+</div>
+</section>
+
+<footer>&copy; 2026 | nakshaa.11.11</footer>
+
+<script>
+function toggle(){
+const menu=document.getElementById("menu");
+const burger=document.getElementById("hamburgerBtn");
+const nextState=arguments.length&&typeof arguments[0]==="boolean"
+?arguments[0]
+:!menu.classList.contains("active");
+menu.classList.toggle("active",nextState);
+burger.classList.toggle("active",nextState);
+burger.setAttribute("aria-expanded",nextState?"true":"false");
+}
+
+document.querySelectorAll("#menu a").forEach(link=>{
+link.addEventListener("click",()=>toggle(false));
+});
+document.addEventListener("keydown",event=>{
+if(event.key==="Escape"){toggle(false);}
+});
+
+const bgVideos=document.querySelectorAll(".bg-video");
+function applyResponsiveVideoSources(){
+const isDesktop=window.matchMedia("(min-width: 769px)").matches;
+bgVideos.forEach(video=>{
+const source=video.querySelector("source");
+if(!source){return;}
+const nextSrc=isDesktop?video.dataset.desktopSrc:video.dataset.mobileSrc;
+if(nextSrc&&source.getAttribute("src")!==nextSrc){
+source.setAttribute("src",nextSrc);
+video.load();
+}
+});
+}
+
+function ensureVideoPlayback(){
+bgVideos.forEach(video=>{
+video.muted=true;
+video.defaultMuted=true;
+const playPromise=video.play();
+if(playPromise&&typeof playPromise.catch==="function"){
+playPromise.catch(()=>{});
+}
+});
+}
+
+const glassCards=document.querySelectorAll(".card");
+const sections=Array.from(document.querySelectorAll("section"));
+function updateGlassParallax(){
+const viewportMid=window.innerHeight/2;
+glassCards.forEach(card=>{
+const section=card.closest("section");
+if(!section){return;}
+const rect=section.getBoundingClientRect();
+const sectionMid=rect.top+(rect.height/2);
+const normalized=(sectionMid-viewportMid)/viewportMid;
+const clamped=Math.max(-1,Math.min(1,normalized));
+const isDesktop=window.matchMedia("(min-width: 769px)").matches;
+const verticalShift=isDesktop?clamped*120:clamped*70;
+const glassSweep=isDesktop?clamped*82:clamped*50;
+card.style.setProperty("--card-shift",`${verticalShift.toFixed(2)}px`);
+card.style.setProperty("--glass-slide",`${glassSweep.toFixed(2)}%`);
+});
+}
+
+function syncScrollUI(){
+const viewportMid=window.innerHeight/2;
+let activeIndex=0;
+let bestDistance=Number.POSITIVE_INFINITY;
+sections.forEach((section,index)=>{
+const rect=section.getBoundingClientRect();
+const sectionMid=rect.top+(rect.height/2);
+const distance=Math.abs(sectionMid-viewportMid);
+if(distance<bestDistance){
+bestDistance=distance;
+activeIndex=index;
+}
+});
+
+sections.forEach((section,index)=>{
+const card=section.querySelector(".card");
+if(card){
+card.classList.add("active");
+}
+const indicator=section.querySelector(".scroll");
+if(indicator){
+const shouldHide=index!==activeIndex||index===sections.length-1;
+indicator.classList.toggle("hidden",shouldHide);
+}
+});
+}
+
+let ticking=false;
+function onScroll(){
+if(ticking){return;}
+ticking=true;
+window.requestAnimationFrame(()=>{
+updateGlassParallax();
+syncScrollUI();
+ticking=false;
+});
+}
+
+window.addEventListener("scroll",onScroll,{passive:true});
+window.addEventListener("resize",()=>{
+applyResponsiveVideoSources();
+ensureVideoPlayback();
+updateGlassParallax();
+syncScrollUI();
+});
+window.addEventListener("load",()=>{
+applyResponsiveVideoSources();
+ensureVideoPlayback();
+updateGlassParallax();
+syncScrollUI();
+});
+document.addEventListener("visibilitychange",()=>{
+if(!document.hidden){ensureVideoPlayback();}
+});
+</script>
+
+</body>
+</html>

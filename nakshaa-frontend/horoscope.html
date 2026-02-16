@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nakshaa Horoscope</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;color:#fff;overflow-x:hidden;overflow-y:auto}
+
+/* VIDEO BACKGROUND */
+.video-wrapper video{
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+object-fit:cover;
+z-index:-3;
+}
+
+#mobile-video{display:none}
+@media(max-width:768px){
+#desktop-video{display:none}
+#mobile-video{display:block}
+}
+
+/* DARK OVERLAY */
+.overlay{
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,.6);
+z-index:-2;
+}
+
+/* GLOBAL HEADER */
+header{
+position:fixed;
+top:0;
+width:100%;
+height:70px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:transparent;
+z-index:1000;
+}
+.hamburger{
+position:absolute;
+left:20px;
+width:42px;
+height:34px;
+display:inline-flex;
+flex-direction:column;
+justify-content:center;
+gap:6px;
+background:transparent;
+border:none;
+padding:0;
+cursor:pointer;
+z-index:1002;
+}
+.hamburger .line{
+display:block;
+width:30px;
+height:3px;
+background:#fff;
+border-radius:999px;
+transition:transform .3s ease,opacity .25s ease;
+}
+.hamburger.active .line:nth-child(1){transform:translateY(9px) rotate(45deg)}
+.hamburger.active .line:nth-child(2){opacity:0}
+.hamburger.active .line:nth-child(3){transform:translateY(-9px) rotate(-45deg)}
+.logo{
+font-family:'Marcellus',serif;
+font-size:24px;
+letter-spacing:3px;
+font-weight:700;
+color:#fff;
+text-decoration:none;
+}
+
+/* GLOBAL MENU */
+.menu{
+position:fixed;
+top:0;
+left:-100%;
+width:70%;
+height:100%;
+background:rgba(0,0,20,.92);
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+transition:.6s;
+z-index:1001;
+}
+.menu a{
+margin:20px 0;
+font-size:1.3rem;
+color:#fff;
+text-decoration:none;
+font-weight:700;
+}
+.menu.active{left:0}
+.menu-close{
+position:absolute;
+top:16px;
+right:16px;
+width:42px;
+height:42px;
+display:flex;
+align-items:center;
+justify-content:center;
+border:1px solid #fff;
+border-radius:10px;
+background:transparent;
+color:#fff;
+font-size:30px;
+line-height:1;
+cursor:pointer;
+transition:transform .2s ease,background .2s ease,color .2s ease;
+}
+.menu-close:hover{
+transform:scale(1.05);
+background:#fff;
+color:#000;
+}
+
+main{padding-top:70px}
+
+/* MAIN SECTION */
+section{
+min-height:calc(100vh - 70px);
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+padding:24px 20px;
+}
+
+.container{
+background:rgba(255,255,255,.05);
+backdrop-filter:blur(25px);
+border:1px solid rgba(255,255,255,.1);
+border-radius:25px;
+padding:40px;
+max-width:1000px;
+width:100%;
+}
+
+h1{font-family:'Marcellus',serif;font-size:2.5rem;margin-bottom:10px}
+p{margin-bottom:25px;opacity:.9;font-weight:700}
+
+/* GRID */
+.grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:15px;
+}
+
+@media(max-width:768px){
+.grid{grid-template-columns:repeat(2,1fr)}
+}
+
+.grid button{
+padding:16px 10px;
+border-radius:15px;
+border:1px solid rgba(255,255,255,.55);
+background:rgba(255,255,255,.08);
+color:#fff;
+cursor:pointer;
+transition:background .3s ease,transform .3s ease,box-shadow .3s ease,border-color .3s ease,color .3s ease;
+font-weight:800;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:8px;
+text-align:center;
+min-height:116px;
+}
+.grid button:hover{
+background:rgba(255,255,255,.16);
+color:#fff;
+border-color:#fff;
+box-shadow:0 0 12px rgba(255,255,255,.7),0 0 30px rgba(255,255,255,.35);
+transform:translateY(-2px);
+}
+.sign-icon{
+width:30px;
+height:30px;
+stroke:currentColor;
+fill:none;
+stroke-width:1.9;
+stroke-linecap:round;
+stroke-linejoin:round;
+}
+.sign-glyph{
+stroke:none;
+fill:currentColor;
+}
+.sign-glyph text{
+font-family:'Segoe UI Symbol','Noto Sans Symbols 2','Noto Sans Symbols2','Arial Unicode MS',sans-serif;
+font-size:20px;
+font-weight:700;
+dominant-baseline:middle;
+text-anchor:middle;
+}
+.sign-name{
+color:#fff;
+font-weight:900;
+line-height:1.15;
+}
+.grid button:hover .sign-name{
+color:#fff;
+text-shadow:0 0 8px rgba(255,255,255,.95),0 0 16px rgba(255,255,255,.7);
+}
+.grid button:hover .sign-icon{
+stroke:#fff;
+}
+.grid button:hover .sign-glyph{
+fill:#fff;
+filter:drop-shadow(0 0 6px rgba(255,255,255,.95));
+}
+
+/* BLUR EFFECT WHEN OPEN */
+.blur{
+filter:blur(10px);
+transition:.4s;
+}
+
+/* GLASS OVERLAY CARD */
+.full-overlay{
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+display:flex;
+align-items:center;
+justify-content:center;
+box-sizing:border-box;
+padding:84px 16px 64px;
+visibility:hidden;
+opacity:0;
+transition:.4s;
+z-index:1500;
+}
+
+.full-overlay.active{
+visibility:visible;
+opacity:1;
+}
+
+.overlay-card{
+width:min(94vw,980px);
+height:auto;
+max-height:100%;
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(40px);
+border-radius:30px;
+border:1px solid rgba(255,255,255,.15);
+padding:64px 22px 24px;
+overflow-y:auto;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:flex-start;
+text-align:center;
+position:relative;
+isolation:isolate;
+color:#fff;
+font-weight:900;
+text-transform:capitalize;
+text-shadow:none;
+}
+.overlay-card > :not(.overlay-art):not(.overlay-close){
+position:relative;
+z-index:2;
+}
+.overlay-art{
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+z-index:1;
+pointer-events:none;
+opacity:.16;
+}
+.overlay-art .neo{
+stroke:#fff;
+fill:none;
+stroke-width:2;
+stroke-linecap:round;
+stroke-linejoin:round;
+filter:none;
+}
+.overlay-art .soft{
+stroke:rgba(255,255,255,.48);
+fill:none;
+stroke-width:1.4;
+stroke-linecap:round;
+stroke-linejoin:round;
+}
+.overlay-art .dot{
+fill:#fff;
+filter:drop-shadow(0 0 8px rgba(255,255,255,.92));
+}
+.overlay-art text{
+fill:rgba(255,255,255,.74);
+font-family:'Segoe UI Symbol','Noto Sans Symbols 2','Noto Sans Symbols2','Arial Unicode MS',sans-serif;
+font-size:24px;
+font-weight:700;
+}
+
+.overlay-card h2{
+font-family:'Marcellus',serif;
+font-size:2rem;
+margin-bottom:6px;
+font-weight:900;
+margin-top:0;
+color:#fff;
+text-shadow:none;
+}
+.overlay-message{
+margin-bottom:10px;
+opacity:1;
+font-weight:900;
+text-align:center;
+width:100%;
+color:#fff;
+text-shadow:none;
+}
+#horoscopeDetails{
+width:min(820px,100%);
+display:grid;
+gap:12px;
+text-align:center;
+align-content:start;
+margin-top:4px;
+justify-items:stretch;
+}
+.detail-item{
+--field-color:#fff;
+width:100%;
+padding:14px 16px;
+border-radius:16px;
+border:1px solid color-mix(in srgb,var(--field-color) 60%,#ffffff 40%);
+background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.04));
+box-shadow:0 0 10px color-mix(in srgb,var(--field-color) 45%,#ffffff 55%),inset 0 0 18px rgba(255,255,255,.09);
+}
+.detail-head{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+margin-bottom:8px;
+}
+.detail-icon{
+width:20px;
+height:20px;
+stroke:var(--field-color);
+fill:none;
+stroke-width:2;
+stroke-linecap:round;
+stroke-linejoin:round;
+filter:drop-shadow(0 0 6px color-mix(in srgb,var(--field-color) 70%,#ffffff 30%));
+}
+.detail-title{
+font-weight:900;
+letter-spacing:.3px;
+color:var(--field-color);
+text-shadow:0 0 8px color-mix(in srgb,var(--field-color) 70%,#ffffff 30%);
+}
+.detail-text{
+margin:0;
+opacity:1;
+font-weight:900;
+line-height:1.5;
+text-align:center;
+color:var(--field-color);
+text-shadow:0 0 6px color-mix(in srgb,var(--field-color) 65%,#ffffff 35%);
+}
+.detail-life{--field-color:#9ff9ff}
+.detail-career{--field-color:#b5ffb8}
+.detail-health{--field-color:#8cffdf}
+.detail-wealth{--field-color:#ffd97f}
+.detail-love{--field-color:#ff9fd6}
+.detail-lucky-number{--field-color:#a8dcff}
+.detail-lucky-color{--field-color:#9af2ff}
+.detail-affirmation{--field-color:#ffc7a6}
+.detail-item:hover{
+transform:translateY(-1px);
+transition:transform .2s ease;
+}
+
+.overlay-close{
+position:absolute;
+top:16px;
+right:16px;
+width:42px;
+height:42px;
+min-height:0;
+min-width:0;
+padding:0;
+display:flex;
+flex-direction:row;
+align-items:center;
+justify-content:center;
+gap:0;
+border:1px solid #fff;
+border-radius:10px;
+background:transparent;
+color:#fff;
+font-size:30px;
+line-height:1;
+font-weight:800;
+cursor:pointer;
+transition:background .2s ease,transform .2s ease;
+z-index:6;
+}
+.overlay-close:hover{
+background:rgba(255,255,255,.15);
+transform:scale(1.04);
+box-shadow:0 0 10px rgba(255,255,255,.75);
+}
+
+/* FOOTER */
+footer{
+text-align:center;
+padding:20px;
+background:#000;
+font-size:13px;
+font-weight:700;
+}
+
+@media(max-width:768px){
+body{overflow-x:hidden;overflow-y:auto}
+header{height:64px}
+main{padding-top:64px}
+.menu{width:80%}
+section{
+height:auto;
+min-height:calc(100vh - 64px);
+align-items:flex-start;
+padding:14px 12px 18px;
+}
+.container{
+padding:20px 12px 16px;
+border-radius:18px;
+max-width:100%;
+}
+h1{font-size:1.9rem}
+p{margin-bottom:18px;font-size:.95rem}
+.grid{
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:10px;
+}
+.grid button{
+min-height:94px;
+padding:12px 8px;
+border-radius:12px;
+gap:6px;
+}
+.sign-icon{
+width:26px;
+height:26px;
+}
+.sign-glyph text{font-size:18px}
+.sign-name{font-size:1rem}
+.overlay-card{
+width:94%;
+height:auto;
+max-height:100%;
+padding:54px 10px 14px;
+border-radius:20px;
+}
+.overlay-card h2{font-size:1.6rem}
+.overlay-message{font-size:.95rem;margin-bottom:10px}
+#horoscopeDetails{gap:9px}
+.detail-item{padding:12px 10px;border-radius:12px}
+.detail-icon{width:18px;height:18px}
+.detail-text{font-size:.92rem;line-height:1.45}
+.overlay-close{
+top:8px;
+right:8px;
+width:36px;
+height:36px;
+font-size:24px;
+}
+.full-overlay{
+padding:72px 8px 56px;
+}
+}
+</style>
+</head>
+<body>
+
+<header>
+<button class="hamburger" id="hamburgerBtn" type="button" onclick="toggle()" aria-label="Toggle menu" aria-controls="menu" aria-expanded="false">
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"></span>
+</button>
+<a class="logo" href="index.html#hero">Nakshaa 11:11</a>
+</header>
+
+<div class="menu" id="menu">
+<button class="menu-close" type="button" onclick="toggle(false)" aria-label="Close menu">&times;</button>
+<a href="index.html#hero">Home</a>
+<a href="#horoscope">Horoscope</a>
+<a href="services.html#services-hero">Services</a>
+<a href="index.html#contact">Contact</a>
+</div>
+
+<div id="page">
+
+<div class="video-wrapper">
+<video id="desktop-video" autoplay muted loop playsinline>
+<source src="VIDEOS/desktop.mp4" type="video/mp4">
+</video>
+
+<video id="mobile-video" autoplay muted loop playsinline>
+<source src="VIDEOS/mobile.mp4" type="video/mp4">
+</video>
+</div>
+
+<div class="overlay"></div>
+
+<main>
+<section id="horoscope">
+<div class="container">
+<h1>Choose Your Rashi</h1>
+<p>The cosmos is speaking. Tap your sign to receive today's divine guidance.</p>
+
+<div class="grid">
+<button onclick="openOverlay('aries')" aria-label="Aries">
+<svg class="sign-icon sign-glyph" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="12">&#9800;</text></svg>
+<span class="sign-name">Aries</span>
+</button>
+<button onclick="openOverlay('taurus')" aria-label="Taurus">
+<svg class="sign-icon sign-glyph" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="12">&#9801;</text></svg>
+<span class="sign-name">Taurus</span>
+</button>
+<button onclick="openOverlay('gemini')" aria-label="Gemini">
+<svg class="sign-icon sign-glyph" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="12">&#9802;</text></svg>
+<span class="sign-name">Gemini</span>
+</button>
+<button onclick="openOverlay('cancer')" aria-label="Cancer">
+<svg class="sign-icon sign-glyph" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="12">&#9803;</text></svg>
+<span class="sign-name">Cancer</span>
+</button>
+<button onclick="openOverlay('leo')" aria-label="Leo">
+<svg class="sign-icon sign-glyph" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="12">&#9804;</text></svg>
+<span class="sign-name">Leo</span>
+</button>
+<button onclick="openOverlay('virgo')" aria-label="Virgo">
+<svg class="sign-icon sign-glyph" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="12">&#9805;</text></svg>
+<span class="sign-name">Virgo</span>
+</button>
+<button onclick="openOverlay('libra')" aria-label="Libra">
+<svg class="sign-icon sign-glyph" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="12">&#9806;</text></svg>
+<span class="sign-name">Libra</span>
+</button>
+<button onclick="openOverlay('scorpio')" aria-label="Scorpio">
+<svg class="sign-icon sign-glyph" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="12">&#9807;</text></svg>
+<span class="sign-name">Scorpio</span>
+</button>
+<button onclick="openOverlay('sagittarius')" aria-label="Sagittarius">
+<svg class="sign-icon sign-glyph" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="12">&#9808;</text></svg>
+<span class="sign-name">Sagittarius</span>
+</button>
+<button onclick="openOverlay('capricorn')" aria-label="Capricorn">
+<svg class="sign-icon sign-glyph" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="12">&#9809;</text></svg>
+<span class="sign-name">Capricorn</span>
+</button>
+<button onclick="openOverlay('aquarius')" aria-label="Aquarius">
+<svg class="sign-icon sign-glyph" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="12">&#9810;</text></svg>
+<span class="sign-name">Aquarius</span>
+</button>
+<button onclick="openOverlay('pisces')" aria-label="Pisces">
+<svg class="sign-icon sign-glyph" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="12">&#9811;</text></svg>
+<span class="sign-name">Pisces</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+
+<footer>&copy; 2026 | nakshaa.11.11</footer>
+
+</div>
+
+<!-- GLASS FULL OVERLAY -->
+<div class="full-overlay" id="overlay">
+<div class="overlay-card">
+<svg class="overlay-art" viewBox="0 0 1200 800" aria-hidden="true">
+<circle class="soft" cx="600" cy="400" r="240"/>
+<circle class="neo" cx="600" cy="400" r="160"/>
+<circle class="soft" cx="600" cy="400" r="96"/>
+<path class="soft" d="M600 160v480M360 400h480M430 230l340 340M770 230 430 570"/>
+<path class="neo" d="M180 180h60M210 150v60"/>
+<path class="neo" d="M952 120a62 62 0 1 1-74 74 52 52 0 1 0 74-74Z"/>
+<circle class="neo" cx="224" cy="620" r="34"/>
+<path class="neo" d="M224 586v68M190 620h68"/>
+<path class="soft" d="M120 520c120-70 240-70 360 0s240 70 360 0 240-70 340 0"/>
+<path class="soft" d="M90 584c150-85 300-85 450 0s300 85 450 0"/>
+<circle class="dot" cx="162" cy="108" r="3"/>
+<circle class="dot" cx="290" cy="136" r="2.5"/>
+<circle class="dot" cx="1040" cy="198" r="3"/>
+<circle class="dot" cx="920" cy="560" r="2.5"/>
+<text x="600" y="120">&#9800;</text>
+<text x="740" y="160">&#9801;</text>
+<text x="840" y="260">&#9802;</text>
+<text x="880" y="400">&#9803;</text>
+<text x="840" y="540">&#9804;</text>
+<text x="740" y="640">&#9805;</text>
+<text x="600" y="680">&#9806;</text>
+<text x="460" y="640">&#9807;</text>
+<text x="360" y="540">&#9808;</text>
+<text x="320" y="400">&#9809;</text>
+<text x="360" y="260">&#9810;</text>
+<text x="460" y="160">&#9811;</text>
+</svg>
+<button class="overlay-close" type="button" onclick="closeOverlay()" aria-label="Close overlay">&times;</button>
+<h2 id="overlayTitle">This Is How It Looks</h2>
+<p class="overlay-message" id="overlayMessage">Horoscope details will appear here dynamically.</p>
+<div id="horoscopeDetails"></div>
+</div>
+</div>
+
+<script>
+function toggle(forceState){
+const menu=document.getElementById("menu");
+const burger=document.getElementById("hamburgerBtn");
+const nextState=typeof forceState==="boolean"
+?forceState
+:!menu.classList.contains("active");
+menu.classList.toggle("active",nextState);
+burger.classList.toggle("active",nextState);
+burger.setAttribute("aria-expanded",nextState?"true":"false");
+}
+
+document.querySelectorAll("#menu a").forEach(link=>{
+link.addEventListener("click",()=>toggle(false));
+});
+
+const overlay=document.getElementById("overlay");
+const page=document.getElementById("page");
+const overlayTitle=document.getElementById("overlayTitle");
+const overlayMessage=document.getElementById("overlayMessage");
+const horoscopeDetails=document.getElementById("horoscopeDetails");
+
+function toTitleCase(value){
+return value.charAt(0).toUpperCase()+value.slice(1).toLowerCase();
+}
+
+function toCamelCaseText(value){
+return String(value||"Not available.")
+.toLowerCase()
+.replace(/(^|[\s-])([a-z])/g,(match,prefix,char)=>`${prefix}${char.toUpperCase()}`);
+}
+
+function getFieldIcon(label){
+const key=(label||"").toLowerCase();
+const iconMap={
+"life":'<svg class="detail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 14.8 9.2 21 12 14.8 14.8 12 21 9.2 14.8 3 12 9.2 9.2Z"/></svg>',
+"career":'<svg class="detail-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="12" rx="2"/><path d="M9 7V5h6v2"/><path d="M4 12h16"/></svg>',
+"health":'<svg class="detail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-3 3 6 2-3h7"/><path d="M12 21s-6.5-4.4-9-8c-1.9-2.9-.8-6.7 2.3-7.7 2.2-.7 4.4.2 5.7 2 1.3-1.8 3.5-2.7 5.7-2 3.1 1 4.2 4.8 2.3 7.7-2.5 3.6-9 8-9 8z"/></svg>',
+"wealth":'<svg class="detail-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M9 10h6M9 14h6M12 7v10"/></svg>',
+"love":'<svg class="detail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-6.5-4.4-9-8c-1.9-2.9-.8-6.7 2.3-7.7 2.2-.7 4.4.2 5.7 2 1.3-1.8 3.5-2.7 5.7-2 3.1 1 4.2 4.8 2.3 7.7-2.5 3.6-9 8-9 8z"/></svg>',
+"lucky number":'<svg class="detail-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/><circle cx="9" cy="9" r="1"/><circle cx="15" cy="9" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="9" cy="15" r="1"/><circle cx="15" cy="15" r="1"/></svg>',
+"lucky color":'<svg class="detail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a8 8 0 1 0 0 16h1.4a1.8 1.8 0 1 0 0-3.6h-1.2a1.8 1.8 0 1 1 0-3.6h4A3.8 3.8 0 0 0 20 9c0-2.8-3.6-5-8-5Z"/><circle cx="8.5" cy="10" r=".9"/><circle cx="11.7" cy="8.4" r=".9"/><circle cx="15" cy="9.3" r=".9"/></svg>',
+"affirmation":'<svg class="detail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14v9h-8l-4 3v-3H5z"/><path d="M12 3v2M9.5 4.3l1 1M14.5 4.3l-1 1"/></svg>'
+};
+return iconMap[key]||'<svg class="detail-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/></svg>';
+}
+
+function getFieldClass(label){
+const key=(label||"").toLowerCase();
+const classMap={
+"life":"detail-life",
+"career":"detail-career",
+"health":"detail-health",
+"wealth":"detail-wealth",
+"love":"detail-love",
+"lucky number":"detail-lucky-number",
+"lucky color":"detail-lucky-color",
+"affirmation":"detail-affirmation"
+};
+return classMap[key]||"";
+}
+
+function addDetailLine(label,value){
+const wrapper=document.createElement("div");
+wrapper.className="detail-item";
+const fieldClass=getFieldClass(label);
+if(fieldClass){
+wrapper.classList.add(fieldClass);
+}
+
+const heading=document.createElement("div");
+heading.className="detail-head";
+
+const iconHolder=document.createElement("span");
+iconHolder.innerHTML=getFieldIcon(label);
+
+const headingText=document.createElement("span");
+headingText.className="detail-title";
+headingText.textContent=toCamelCaseText(label);
+
+heading.appendChild(iconHolder.firstChild);
+heading.appendChild(headingText);
+
+const content=document.createElement("p");
+content.className="detail-text";
+content.textContent=toCamelCaseText(value||"Not available.");
+
+wrapper.appendChild(heading);
+wrapper.appendChild(content);
+horoscopeDetails.appendChild(wrapper);
+}
+
+async function openOverlay(sign){
+// Show existing overlay UI and blur the background before fetching.
+overlay.classList.add("active");
+page.classList.add("blur");
+
+// Initial loading state while backend data is being fetched.
+const safeSign=(sign||"").toLowerCase();
+overlayTitle.textContent=safeSign?`${toTitleCase(safeSign)} Horoscope`:"Horoscope";
+overlayMessage.textContent="Loading...";
+horoscopeDetails.innerHTML="";
+
+try{
+// Connect frontend to backend horoscope API for selected sign.
+const response=await fetch("http://localhost:5000/api/horoscope/"+safeSign);
+let payload={};
+try{
+payload=await response.json();
+}catch(_){
+payload={};
+}
+
+if(!response.ok){
+const backendMessage=payload.message||payload.error||"Unable to load horoscope right now.";
+throw new Error(backendMessage);
+}
+
+// Populate overlay dynamically using backend response fields.
+overlayMessage.textContent="";
+addDetailLine("Life",payload.life);
+addDetailLine("Career",payload.career);
+addDetailLine("Health",payload.health);
+addDetailLine("Wealth",payload.wealth);
+addDetailLine("Love",payload.love);
+addDetailLine("Lucky Number",payload.luckyNumber);
+addDetailLine("Lucky Color",payload.luckyColor);
+addDetailLine("Affirmation",payload.affirmation);
+}catch(error){
+// Friendly fallback message for API/network/backend errors.
+overlayMessage.textContent=toCamelCaseText("Unable to load your horoscope right now. Please try again shortly.");
+horoscopeDetails.innerHTML="";
+}
+}
+
+function closeOverlay(){
+overlay.classList.remove("active");
+page.classList.remove("blur");
+}
+
+document.addEventListener("keydown",event=>{
+if(event.key==="Escape"){
+toggle(false);
+closeOverlay();
+}
+});
+</script>
+
+</body>
+</html>
+
+

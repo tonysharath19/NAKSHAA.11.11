@@ -67,11 +67,25 @@ app.get("/api/horoscope/:sign", async (req, res) => {
 
     // Get today's date in YYYY-MM-DD format
     const today = new Date().toISOString().split("T")[0];
+    console.log("Fetch route date:", today);
+    let horoscope = await Horoscope.findOne({
+  sign: sign.toLowerCase(),
+  date: today
+});
 
-    const horoscope = await Horoscope.findOne({
-      sign: sign.toLowerCase(),
-      date: today
-    });
+// If not found for today, get latest available
+if (!horoscope) {
+  horoscope = await Horoscope.findOne({
+    sign: sign.toLowerCase()
+  }).sort({ date: -1 });
+}
+
+if (!horoscope) {
+  return res.status(404).json({
+    message: "Horoscope not available."
+  });
+}
+
 
     if (!horoscope) {
       return res.status(404).json({
@@ -175,6 +189,9 @@ const parsed = JSON.parse(jsonMatch[0]);
         ...parsed[sign]
       });
     }
+// 🧹 Delete previous day's horoscopes
+await Horoscope.deleteMany({ date: { $ne: today } });
+console.log("Old horoscopes deleted.");
 
     res.json({ message: "Today's horoscopes generated successfully 🔥" });
 

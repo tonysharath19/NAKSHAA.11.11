@@ -735,7 +735,10 @@ horoscopeDetails.innerHTML="";
 
 try{
 // Connect frontend to backend horoscope API for selected sign.
-const response=await fetch("http://localhost:5000/api/horoscope/"+safeSign);
+const response = await fetch(`https://nakshaa-11-11.onrender.com/api/horoscope/${sign}`);
+
+
+
 let payload={};
 try{
 payload=await response.json();

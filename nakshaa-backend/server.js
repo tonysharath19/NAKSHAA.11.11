@@ -4,7 +4,6 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const Horoscope = require("./models/Horoscope");
 const cron = require("node-cron");
-
 const Groq = require("groq-sdk");
 
 const groq = new Groq({
@@ -12,123 +11,40 @@ const groq = new Groq({
 });
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
+const PORT = process.env.PORT || 5000;
+
 // 🔮 Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("MongoDB Connected 🔥");
-  })
-  .catch((err) => {
-    console.error("MongoDB Connection Error:", err);
-  });
+  .then(() => console.log("MongoDB Connected 🔥"))
+  .catch((err) => console.error("MongoDB Connection Error:", err));
 
-// Root route
-app.get("/", (req, res) => {
-  res.send("Nakshaa Backend Running 🔮");
-});
 
-// Test API route
-app.get("/api/test", (req, res) => {
-  res.json({ message: "API working properly 🚀" });
-});
+// =======================================================
+// 🔮 GENERATION LOGIC (Reusable Function)
+// =======================================================
 
-// Insert dummy horoscope
-app.get("/api/insert-test", async (req, res) => {
-  try {
-    const newHoroscope = new Horoscope({
-      date: "2026-02-16",
-      sign: "aries",
-      life: "This is life guidance.",
-      career: "This is career guidance.",
-      health: "This is health guidance.",
-      wealth: "This is wealth guidance.",
-      love: "This is love guidance.",
-      luckyNumber: "7",
-      luckyColor: "Royal Blue",
-      affirmation: "This is how it looks."
-    });
+async function generateDailyHoroscope() {
+  const today = new Date().toISOString().split("T")[0];
 
-    await newHoroscope.save();
-
-    res.json({ message: "Test horoscope saved successfully 🔮" });
-
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  const existing = await Horoscope.findOne({ date: today });
+  if (existing) {
+    console.log("Horoscope already exists for today.");
+    return { message: "Already generated" };
   }
-});
 
-// Get horoscope by sign (latest for today)
-app.get("/api/horoscope/:sign", async (req, res) => {
-  try {
-    const { sign } = req.params;
-
-    // Get today's date in YYYY-MM-DD format
-    const today = new Date().toISOString().split("T")[0];
-    console.log("Fetch route date:", today);
-    let horoscope = await Horoscope.findOne({
-  sign: sign.toLowerCase(),
-  date: today
-});
-
-// If not found for today, get latest available
-if (!horoscope) {
-  horoscope = await Horoscope.findOne({
-    sign: sign.toLowerCase()
-  }).sort({ date: -1 });
-}
-
-if (!horoscope) {
-  return res.status(404).json({
-    message: "Horoscope not available."
-  });
-}
-
-
-    if (!horoscope) {
-      return res.status(404).json({
-        message: "Horoscope not found for today."
-      });
-    }
-
-    res.json(horoscope);
-
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// 🔮 Generate Daily Horoscope (All 12 Signs)
-app.get("/api/generate", async (req, res) => {
-  try {
-
-    const today = new Date().toISOString().split("T")[0];
-
-    // Prevent duplicate generation
-    const existing = await Horoscope.findOne({ date: today });
-    if (existing) {
-      return res.json({ message: "Horoscope already generated for today 🔮" });
-    }
-
-const prompt = `
+  const prompt = `
 Generate today's horoscope for all 12 zodiac signs.
 
 CRITICAL RULES:
 - Return ONLY valid raw JSON.
 - No explanation.
 - No markdown.
-- No extra text.
-- JSON must parse correctly.
-- Each of the fields (life, career, health, wealth, love) must contain EXACTLY TWO sentences.
-- Each field must contain exactly TWO periods.
-- No more than two sentences.
-- Do not repeat themes across signs.
-- Each zodiac must feel completely different in tone and focus.
-- Use sign personality traits to differentiate content.
-- Avoid generic advice.
-- Avoid repeating structure across signs.
+- Each field (life, career, health, wealth, love) must contain EXACTLY TWO sentences.
+- Each zodiac must feel completely different.
+- Affirmation must be ONE short sentence under 8 words.
 
 STRICT FORMAT:
 
@@ -142,98 +58,113 @@ STRICT FORMAT:
     "luckyNumber": "...",
     "luckyColor": "...",
     "affirmation": "..."
-  },
-  "taurus": {...},
-  "gemini": {...},
-  "cancer": {...},
-  "leo": {...},
-  "virgo": {...},
-  "libra": {...},
-  "scorpio": {...},
-  "sagittarius": {...},
-  "capricorn": {...},
-  "aquarius": {...},
-  "pisces": {...}
+  }
+  // All 12 signs
 }
-
-Lucky number must be between 1 and 9.
-Lucky color must be realistic.
-Affirmation must be ONE short sentence under 8 words.
 `;
 
+  const completion = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.6,
+    max_tokens: 6000
+  });
 
-    const completion = await groq.chat.completions.create({
-  model: "llama-3.1-8b-instant",
-  messages: [{ role: "user", content: prompt }],
-  temperature: 0.6,      // slightly higher for uniqueness
-  max_tokens: 6000
-});
+  const aiText = completion.choices[0].message.content;
+  const jsonMatch = aiText.match(/\{[\s\S]*\}/);
 
+  if (!jsonMatch) {
+    throw new Error("Invalid JSON from AI");
+  }
 
+  const parsed = JSON.parse(jsonMatch[0]);
 
-    const aiText = completion.choices[0].message.content;
+  for (let sign in parsed) {
+    await Horoscope.create({
+      date: today,
+      sign: sign,
+      ...parsed[sign]
+    });
+  }
 
-    // Extract JSON from AI response safely
-const jsonMatch = aiText.match(/\{[\s\S]*\}/);
+  // 🧹 Delete old records
+  await Horoscope.deleteMany({ date: { $ne: today } });
 
-if (!jsonMatch) {
-  throw new Error("No valid JSON found in AI response");
+  console.log("New horoscope generated. Old records deleted.");
+  return { message: "Generated successfully" };
 }
 
-const parsed = JSON.parse(jsonMatch[0]);
 
-    for (let sign in parsed) {
-      await Horoscope.create({
-        date: today,
-        sign: sign,
-        ...parsed[sign]
+// =======================================================
+// 🌍 ROUTES
+// =======================================================
+
+// Root route
+app.get("/", (req, res) => {
+  res.send("Nakshaa Backend Running 🔮");
+});
+
+// Fetch horoscope by sign (UTC safe + fallback)
+app.get("/api/horoscope/:sign", async (req, res) => {
+  try {
+    const { sign } = req.params;
+    const today = new Date().toISOString().split("T")[0];
+
+    let horoscope = await Horoscope.findOne({
+      sign: sign.toLowerCase(),
+      date: today
+    });
+
+    // Fallback to latest if today's not found
+    if (!horoscope) {
+      horoscope = await Horoscope.findOne({
+        sign: sign.toLowerCase()
+      }).sort({ date: -1 });
+    }
+
+    if (!horoscope) {
+      return res.status(404).json({
+        message: "Horoscope not available."
       });
     }
-// 🧹 Delete previous day's horoscopes
-await Horoscope.deleteMany({ date: { $ne: today } });
-console.log("Old horoscopes deleted.");
 
-    res.json({ message: "Today's horoscopes generated successfully 🔥" });
+    res.json(horoscope);
 
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Manual generation route
+app.get("/api/generate", async (req, res) => {
+  try {
+    const result = await generateDailyHoroscope();
+    res.json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
 
-app.get("/api/models", async (req, res) => {
-  try {
-    const models = await groq.models.list();
-    res.json(models);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
-// 🔥 Auto Generate Horoscope Every Day at 12:01 AM
-cron.schedule("1 0 * * *", async () => {
-console.log("Cron triggered at:", new Date());
-  console.log("⏳ Running scheduled horoscope generation...");
+// =======================================================
+// ⏰ CRON (Midnight UTC)
+// =======================================================
+
+cron.schedule("0 0 * * *", async () => {
+  console.log("Cron triggered at:", new Date());
 
   try {
-    const today = new Date().toISOString().split("T")[0];
-
-    const existing = await Horoscope.findOne({ date: today });
-
-    if (!existing) {
-      console.log("Generating today's horoscope...");
-      await fetch(`http://localhost:${PORT}/api/generate`);
-    } else {
-      console.log("Horoscope already exists for today.");
-    }
-
+    await generateDailyHoroscope();
   } catch (error) {
-    console.error("Cron Error:", error.message);
+    console.error("Cron error:", error.message);
   }
 });
 
 
-const PORT = process.env.PORT || 5000;
+// =======================================================
+// 🚀 START SERVER
+// =======================================================
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

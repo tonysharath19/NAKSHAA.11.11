@@ -11,7 +11,16 @@ const groq = new Groq({
 });
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: [
+    "https://nakshaa-1111.onrender.com",
+    "http://localhost:3000",
+    "http://localhost:5500"
+  ],
+  methods: ["GET", "POST"],
+  credentials: false
+}));
+
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
